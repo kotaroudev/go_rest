@@ -23,6 +23,8 @@ func main() {
 	JWT_SECRET := os.Getenv("JWT_SECRET")
 	DATABASE_URL := os.Getenv("DATABASE_URL")
 
+	// el context.Background() es un ctx vacio sin deadline, sin values
+	// y sin una posible cancelacion
 	s, err := server.NewServer(context.Background(), &server.Config{
 		JWTSecret:   JWT_SECRET,
 		Port:        PORT,

@@ -28,17 +28,22 @@ func (b *Broker) Config() *Config {
 	return b.config
 }
 
+// El ctx es el contexto que permite gestionar
+// el deadline(tiempo limite de operacion), los values
+// (pares key,value asociados al ctx) transmitidos por todas las goroutines
+// que utilicen el ctx y la cancelacion(con el ctx puedes cancelar un proceso
+// de manera segura)
 func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 	if config.Port == "" {
-		return nil, errors.New("Port is required")
+		return nil, errors.New("port is required")
 	}
 
 	if config.JWTSecret == "" {
-		return nil, errors.New("Secret is required")
+		return nil, errors.New("secret is required")
 	}
 
 	if config.DatabaseURL == "" {
-		return nil, errors.New("Database url is required")
+		return nil, errors.New("database url is required")
 	}
 
 	broker := &Broker{
