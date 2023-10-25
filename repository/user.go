@@ -23,6 +23,31 @@ type UserRepository interface {
 // La inyeccion de dependencias es la que "inyecta" la implementacion concreta
 // de la base de datos utilizada.
 
+// Arquitecturas limpias
+// Se basan en que giran en torno al "dominio".
+// El dominio no debe ser expuesto y debe estar totalmente desacoplado de las
+// capas externas. El dominio debe funcionar sin importar todas las demas
+// capas; sin importar si hay o no sistema.
+// Una analogia podria ser que el dominio sea un programa de consola
+// donde funciona toda la logica del negocio pero no tiene frameworks, ni base
+// de datos, ni ninguna integracion; sino que todo funciona de manera basica
+// mundana se podria decir, pero contiene todo el funcionamiento del core del negocio.
+// Por ejemplo en una red social el core del negocio seria:
+// - publicar posts
+// - mandar mensajes
+// - comentar posts
+// - editar perfil
+// - etc
+// Estas funciones deberian poder ejecutarse con datos primitivos desacoplados
+//  de las capas externas.
+// En esto se basan todas las arquitecturas limpias.
+// En nuestro ejemplo el "dominio o core" viene a ser:
+// - intertar usuario
+// - hacer login
+// - obtener un usario
+// - hacer un logout
+// - etc
+
 var implementation UserRepository
 
 func SetRepository(repository UserRepository) {
