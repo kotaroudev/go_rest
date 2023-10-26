@@ -6,10 +6,11 @@ import (
 	"github.com/kotaroudev/go_rest/models"
 )
 
-type UserRepository interface {
+type Repository interface {
 	InsertUser(ctx context.Context, user *models.User) error
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	InsertPost(ctx context.Context, post *models.Post) error
 	Close() error
 }
 
@@ -50,9 +51,14 @@ type UserRepository interface {
 // - hacer un logout
 // - etc
 
-var implementation UserRepository
+// El orden para agregar un nuevo endpoint seria:
+// 1. Dominio: abstracciones e interfaces dentro de repository y models
+// 2. Implementacion concreta en la base de datos
+// 3. Gestion de req y res en los handlers.
 
-func SetRepository(repository UserRepository) {
+var implementation Repository
+
+func SetRepository(repository Repository) {
 	implementation = repository
 }
 
@@ -66,6 +72,10 @@ func GetUserByID(ctx context.Context, id string) (*models.User, error) {
 
 func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	return implementation.GetUserByEmail(ctx, email)
+}
+
+func InsertPost(ctx context.Context, post *models.Post) error {
+	return implementation.InsertPost(ctx, post)
 }
 
 func Close() error {
