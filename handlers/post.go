@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -24,6 +25,10 @@ type PostResponse struct {
 
 type PostUpdateResponse struct {
 	Message string `json:"message"`
+}
+
+type ListPostResponse struct {
+	Posts []*models.Post `json:"posts"`
 }
 
 func InsertPostHandler(s server.Server) http.HandlerFunc {
@@ -141,7 +146,7 @@ func DeletePostHandler(s server.Server) http.HandlerFunc {
 
 func GetPostByIdHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Obtener query params con mux
+		// Obtener params con mux
 		params := mux.Vars(r)
 		post, err := repository.GetPostByID(r.Context(), params["id"])
 		if err != nil {
@@ -150,5 +155,30 @@ func GetPostByIdHandler(s server.Server) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(post)
+	}
+}
+
+func ListPostHandler(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		// Obtener query params del *http.Request
+		pageString := r.URL.Query().Get("page")
+		var page = uint64(0)
+		if pageString != "" {
+			page, err = strconv.ParseUint(pageString, 10, 64)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+		}
+		posts, err := repository.ListPost(r.Context(), page)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ListPostResponse{
+			Posts: posts,
+		})
 	}
 }
