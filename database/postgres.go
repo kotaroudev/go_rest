@@ -118,6 +118,13 @@ func (repo *PostgresRepository) UpdatePost(ctx context.Context, post *models.Pos
 	return err
 }
 
+func (repo *PostgresRepository) DeletePost(ctx context.Context, id string, userId string) error {
+	_, err := repo.db.ExecContext(ctx,
+		"DELETE FROM posts WHERE id = $1 and user_id = $2",
+		id, userId)
+	return err
+}
+
 func (repo *PostgresRepository) Close() error {
 	return repo.db.Close()
 }
