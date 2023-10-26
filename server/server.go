@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kotaroudev/go_rest/database"
 	"github.com/kotaroudev/go_rest/repository"
+	"github.com/kotaroudev/go_rest/websocket"
 )
 
 type Config struct {
@@ -19,15 +20,21 @@ type Config struct {
 
 type Server interface {
 	Config() *Config
+	Hub() *websocket.Hub
 }
 
 type Broker struct {
 	config *Config
 	router *mux.Router
+	hub    *websocket.Hub
 }
 
 func (b *Broker) Config() *Config {
 	return b.config
+}
+
+func (b *Broker) Hub() *websocket.Hub {
+	return b.hub
 }
 
 // El ctx es el contexto que permite gestionar
@@ -51,6 +58,7 @@ func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 	broker := &Broker{
 		config: config,
 		router: mux.NewRouter(),
+		hub:    websocket.NewHub(),
 	}
 
 	return broker, nil
@@ -63,6 +71,7 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	go b.hub.Run()
 	repository.SetRepository(repo)
 	log.Println("Starting server on port", b.Config().Port)
 	if err := http.ListenAndServe(b.config.Port, b.router); err != nil {
