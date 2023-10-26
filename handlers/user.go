@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -119,5 +120,51 @@ func LoginHandler(s server.Server) http.HandlerFunc {
 			Token: tokenString,
 		})
 
+	}
+}
+
+func MeHandler(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
+		token, err := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(t *jwt.Token) (interface{}, error) {
+			return []byte(s.Config().JWTSecret), nil
+		})
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		// Recordar teoria basica
+		// Type Assertion
+		// Se utiliza para comprobar que un dato cumpla
+		// con la estructura de datos de un interface o un struct.
+		// La notacion es: dato.(interfaceOstruct)
+		// Retorna 2 valores:
+		// valor1, ok := dato.(interfaceOstruct)
+		// - valor1 es el dato convertido al tipo de interfaceOstruct
+		// - ok es un bool que sera true si se cumple el type assertion
+		// y false si no cumple.
+		// En caso que no se cumpla el type assertion el valor1 sera
+		// el zero value del interface o struct que se intenta evaluar.
+		// Recordar que el zero value de un puntero es nil
+		// En el ejemplo claims, ok := token.Claims.(*models.AppClaims)
+		// si ok es false, claims sera nil
+		// Conversion de tipo
+		// El casteo simple de los datos primitivos en go es dato(tipo).
+		// Ejemplo: num := 4
+		// num_float := float64(num)
+		if claims, ok := token.Claims.(*models.AppClaims); ok && token.Valid {
+			user, err := repository.GetUserByID(r.Context(), claims.UserId)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(user)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
