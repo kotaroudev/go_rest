@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/gorilla/mux"
 	"github.com/kotaroudev/go_rest/models"
 	"github.com/kotaroudev/go_rest/repository"
 	"github.com/kotaroudev/go_rest/server"
@@ -62,5 +63,19 @@ func InsertPostHandler(s server.Server) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func GetPostByIdHandler(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Obtener query params con mux
+		params := mux.Vars(r)
+		post, err := repository.GetPostByID(r.Context(), params["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(post)
 	}
 }

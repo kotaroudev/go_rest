@@ -11,6 +11,7 @@ type Repository interface {
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	InsertPost(ctx context.Context, post *models.Post) error
+	GetPostByID(ctx context.Context, id string) (*models.Post, error)
 	Close() error
 }
 
@@ -76,6 +77,10 @@ func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 
 func InsertPost(ctx context.Context, post *models.Post) error {
 	return implementation.InsertPost(ctx, post)
+}
+
+func GetPostByID(ctx context.Context, id string) (*models.Post, error) {
+	return implementation.GetPostByID(ctx, id)
 }
 
 func Close() error {
